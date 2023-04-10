@@ -2,9 +2,9 @@
 
 mod_key mod_map[] = {
     // key                1st function     2nd function
-    {  KEY_CAPSLOCK,      KEY_ESC,         KEY_LEFTALT     }, // Change both CAPS' primary and secondary function
-    {  KEY_ENTER,         0,               KEY_RIGHTALT    }, // Do not change ENTER's primary function
-    {  KEY_ESC,           KEY_CAPSLOCK  }  // Only change ESC's primary function
+    {  KEY_CAPSLOCK,      KEY_ESC,         KEY_LEFTALT     }, // Change CAPS' both primary and secondary function
+    {  KEY_ENTER,         0,               KEY_RIGHTALT    }, // Change ENTER's secondary function only
+    {  KEY_ESC,           KEY_CAPSLOCK  }  // Change ESC's primary function only
 };
 
 // Delay in milliseconds. 
