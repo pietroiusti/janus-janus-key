@@ -43,6 +43,11 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 #include "libevdev/libevdev.h"
 #include "libevdev/libevdev-uinput.h"
@@ -133,7 +138,7 @@ static void send_key_ev_and_sync(const struct libevdev_uinput *uidev, unsigned i
         perror("Error in writing EV_SYN, SYN_REPORT, 0.\n");
         exit(err);
     }
-    
+
     //printf("Sending %u %u\n", code, value);
 }
 
@@ -267,15 +272,75 @@ print_sync_event(struct input_event *ev)
     return 0;
 }
 
-/* 
+/*
 ********************************************************************************
 END functions from libevdev-1.11.0/tools/libevdev-events.c
 ********************************************************************************
 */
 
+void *xfun() {
+    Display* display;
+    XEvent an_event;
+    char *display_name = getenv("DISPLAY");
+    display = XOpenDisplay(display_name);
+    if (display == NULL) {
+        printf("Cannot connect to X\n");
+        exit(1);
+    }
+    Window root_window = DefaultRootWindow(display);
+    Atom property = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+    XSelectInput(display, root_window, PropertyChangeMask);
+    //return values
+    Atom type_return;
+    int format_return;
+    unsigned long nitems_return;
+    unsigned long bytes_left;
+    unsigned char *data;
+    while(1) {
+        XNextEvent(display, &an_event);
+        if (an_event.xproperty.atom != property) {
+            continue;
+        }
+        XGetWindowProperty(display,
+                           root_window,
+                           property,
+                           0,
+                           1,
+                           False,
+                           XA_WINDOW,
+                           &type_return,   //should be XA_WINDOW
+                           &format_return, //should be 32
+                           &nitems_return, //should be 1 (zero if there is no such window)
+                           &bytes_left,    //should be 0 (i'm not sure but should be atomic read)
+                           &data           //should be non-null
+            );
+        Window active_window = *(Window *)data;
+        if (active_window == 0)
+            continue;
+        char* window_name;
+        if (XFetchName(display, active_window, &window_name) != 0) {
+            printf("The active window is: %s\n", window_name);
+            XFree(window_name);
+        }
+        XClassHint class_hint;
+        if (XGetClassHint(display, active_window, &class_hint) == 0)
+            continue;
+        char * window_class = class_hint.res_class;
+        char * window_foo = class_hint.res_name;
+        printf("res.class = %s\n", window_class);
+        printf("res.name = %s\n", window_foo);
+        printf("\n\n");
+    }
+}
+
 int
 main(int argc, char **argv)
 {
+    pthread_t xthread;
+    int xthread_return_value;
+    xthread_return_value = pthread_create(&xthread, NULL, xfun, NULL);
+
+
     tp_max_delay.tv_sec = 0;
     tp_max_delay.tv_nsec = max_delay * 1000000;
 
@@ -316,7 +381,7 @@ main(int argc, char **argv)
     err = libevdev_uinput_create_from_device(dev, uifd, &uidev);
     if (err != 0)
         return err;
-        
+
     int grab = libevdev_grab(dev, LIBEVDEV_GRAB);
     if (grab < 0) {
         printf("grab < 0\n");
@@ -341,13 +406,13 @@ main(int argc, char **argv)
             }
         }
     } while (rc == LIBEVDEV_READ_STATUS_SYNC || rc == LIBEVDEV_READ_STATUS_SUCCESS || rc == -EAGAIN);
-    
+
     if (rc != LIBEVDEV_READ_STATUS_SUCCESS && rc != -EAGAIN)
         fprintf(stderr, "Failed to handle events: %s\n", strerror(-rc));
-    
+
     rc = 0;
 out:
     libevdev_free(dev);
-    
+
     return rc;
 }

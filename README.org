@@ -5,12 +5,12 @@ A janus version of janus-key.
 * Compile and run
 Compile with
 #+begin_src
-gcc `pkg-config --cflags libevdev` janus-janus-key.c `pkg-config --libs libevdev` -lpthread -o janus-janus-key
+gcc `pkg-config --cflags libevdev` janus-janus-key.c `pkg-config --libs libevdev` -lX11 -lpthread -o janus-janus-key
 #+end_src
 
 Run
 #+begin_src
-sudo ./janus-key /dev/input/event<NUMBER>
+sudo ./janus-janus-key /dev/input/event<NUMBER>
 #+end_src
 
 * 
