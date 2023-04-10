@@ -1,8 +1,10 @@
 /*
-  
-    janus-key. Give keys a double function.
 
-    Copyright (C) 2021, 2022  Giulio Pietroiusti
+    janus-janus-key.
+
+    A janus version of janus-key.
+
+    Copyright (C) 2023  Giulio Pietroiusti
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +21,12 @@
 
 */
 
+
+// Compile with:
+// gcc `pkg-config --cflags libevdev` janus-janus-key.c `pkg-config --libs libevdev` -pthread -lX11 -o janus-janus-key
+
+
+// Vocabulary:
 // `janus keys`: those keys that have beeen assigned a secondary
 //  function.
 
