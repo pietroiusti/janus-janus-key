@@ -1,0 +1,32 @@
+#+title: janus-janus-key
+
+A janus version of janus-key.
+
+* Compile and run
+Compile with
+#+begin_src
+gcc `pkg-config --cflags libevdev` janus-janus-key.c `pkg-config --libs libevdev` -lpthread -o janus-janus-key
+#+end_src
+
+Run
+#+begin_src
+sudo ./janus-key /dev/input/event<NUMBER>
+#+end_src
+
+* 
+janus-janus-key
+
+Copyright (C) 2023  Giulio Pietroiusti
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
