@@ -296,6 +296,37 @@ void *xfun() {
     unsigned long nitems_return;
     unsigned long bytes_left;
     unsigned char *data;
+
+    XGetWindowProperty(display,
+                       root_window,
+                       property,
+                       0,
+                       1,
+                       False,
+                       XA_WINDOW,
+                       &type_return,   //should be XA_WINDOW
+                       &format_return, //should be 32
+                       &nitems_return, //should be 1 (zero if there is no such window)
+                       &bytes_left,    //should be 0 (i'm not sure but should be atomic read)
+                       &data           //should be non-null
+        );
+    Window our_magic_window = *(Window *)data;
+    if (our_magic_window != 0) {
+        // Get name of the window
+        char* window_name;
+        if (XFetchName(display, our_magic_window, &window_name) != 0) {
+            printf("The active window is: %s\n", window_name);
+            XFree(window_name);
+        }
+        XClassHint class_hint;
+        if (XGetClassHint(display, our_magic_window, &class_hint) != 0) {
+            char * window_application_class = class_hint.res_class;
+            char * window_application_name = class_hint.res_name;
+            printf("res.class = %s\n", window_application_class);
+            printf("res.name = %s\n", window_application_name);
+        }
+    }
+
     while(1) {
         XNextEvent(display, &an_event);
         if (an_event.xproperty.atom != property) {
@@ -329,7 +360,6 @@ void *xfun() {
         char * window_foo = class_hint.res_name;
         printf("res.class = %s\n", window_class);
         printf("res.name = %s\n", window_foo);
-        printf("\n\n");
     }
 }
 
